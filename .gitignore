@@ -1,0 +1,36 @@
+# Binaries
+seyhoun
+seyhoun-cli
+migrate
+
+# Dependencies
+web/node_modules/
+
+# Build output
+web/dist/
+
+# Config with secrets (copy config.example.yml → config.yml locally)
+config.yml
+
+# Environment secrets
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
+
+# SQLite (legacy)
+seyhoun.db*
+
+# Temp / logs
+tmp/
+*.log

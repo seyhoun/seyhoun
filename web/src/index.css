@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #0d0f1a;
+  color: #e2e4f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── ReactFlow dark overrides ───────────────────────────────────────── */
+
+.react-flow {
+  background: #0d0f1a;
+}
+
+/* Edge paths */
+.react-flow__edge-path,
+.react-flow__connection-path {
+  stroke: #4a4f6a;
+  stroke-width: 1.5;
+}
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge:focus .react-flow__edge-path {
+  stroke: #6366f1;
+}
+
+/* Edge label */
+.react-flow__edge-text {
+  fill: #8b8fa8;
+  font-size: 11px;
+}
+.react-flow__edge-textbg {
+  fill: #1a1c2e;
+}
+
+/* Selection box */
+.react-flow__selection {
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+/* Node resize handle */
+.react-flow__resize-control.handle {
+  background: #6366f1;
+  border-color: #818cf8;
+}
+
+/* Controls */
+.react-flow__controls {
+  box-shadow: none;
+  border: 1px solid #2d3150;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.react-flow__controls-button {
+  background: #1a1c2e !important;
+  border: none !important;
+  border-bottom: 1px solid #2d3150 !important;
+  color: #8b8fa8 !important;
+  fill: #8b8fa8 !important;
+  width: 28px;
+  height: 28px;
+}
+.react-flow__controls-button:hover {
+  background: #22253a !important;
+  fill: #e2e4f0 !important;
+}
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+.react-flow__controls-button svg {
+  fill: inherit;
+}
+
+/* MiniMap */
+.react-flow__minimap {
+  background: #12141f !important;
+  border: 1px solid #2d3150 !important;
+  border-radius: 8px !important;
+}
+.react-flow__minimap-mask {
+  fill: rgba(13, 15, 26, 0.7) !important;
+}
+.react-flow__minimap-node {
+  fill: #2d3150 !important;
+}
+
+/* Background dots */
+.react-flow__background pattern circle {
+  fill: #2d3150;
+}
+
+/* ── Read-only canvas — hide all handles (keep in DOM for edge path calc) */
+.arch-readonly .arch-handle {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ── Handle dots ─────────────────────────────────────────────────── */
+
+/* Base — always present, invisible until needed */
+.arch-handle {
+  width: 10px !important;
+  height: 10px !important;
+  background: #4a4f6a !important;
+  border: 1.5px solid #3a3f5a !important;
+  border-radius: 50% !important;
+  opacity: 0;
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+
+/* Show handles when the node is hovered or selected */
+.react-flow__node:hover .arch-handle,
+.react-flow__node.selected .arch-handle {
+  opacity: 1;
+}
+
+/* Hover — grow in place via box-shadow ring (same color, no transform) */
+.arch-handle:hover {
+  opacity: 1 !important;
+  box-shadow: 0 0 0 4px #4a4f6a !important;
+}
+
+/* Actively connecting — indigo ring */
+.arch-handle.react-flow__handle-connecting,
+.arch-handle.react-flow__handle-valid {
+  opacity: 1 !important;
+  background: #6366f1 !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* Fallback for any non-arch handle */
+.react-flow__handle {
+  background: #4a4f6a !important;
+  border: 1.5px solid #2d3150 !important;
+  border-radius: 50%;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* ── Sub-item handles (topics, queues, tables) ────────────────────── */
+
+.arch-sub-handle {
+  width: 7px !important;
+  height: 7px !important;
+  background: #4a4f6a !important;
+  border: 1px solid #3a3f5a !important;
+  border-radius: 50% !important;
+  opacity: 0;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  /* Override RF absolute positioning — SubItems manages position via style prop */
+  position: absolute !important;
+}
+
+.react-flow__node:hover .arch-sub-handle,
+.react-flow__node.selected .arch-sub-handle {
+  opacity: 0.6;
+}
+
+.arch-sub-handle:hover {
+  opacity: 1 !important;
+  box-shadow: 0 0 0 3px #4a4f6a !important;
+}
+
+.arch-sub-handle.react-flow__handle-connecting,
+.arch-sub-handle.react-flow__handle-valid {
+  opacity: 1 !important;
+  background: #6366f1 !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35) !important;
+}
+
+.arch-readonly .arch-sub-handle {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: seyhoun
+      POSTGRES_USER: seyhoun
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seyhoun -d seyhoun"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "1374:1374"
+    environment:
+      SERVER_PORT: 1374
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: seyhoun
+      DATABASE_USER: seyhoun
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD is required}
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET is required}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

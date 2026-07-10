@@ -1,0 +1,34 @@
+# Binaries
+seyhoun
+seyhoun-cli
+migrate
+
+# Dependencies
+web/node_modules/
+
+# Build output (rebuilt inside Docker)
+web/dist/
+
+# Secrets
+config.yml
+.env
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.log
+
+# Git
+.git/
+.gitignore
+
+# CI
+.github/
+
+# Claude
+.claude/
+
+# Temp
+tmp/

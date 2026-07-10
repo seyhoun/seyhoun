@@ -1,0 +1,30 @@
+# Seyhoun configuration
+# Copy this file to config.yml and fill in your values.
+# All keys can be overridden via environment variables using _ as separator.
+# Example: DATABASE_PASSWORD overrides database.password
+#
+# See .env.example for the full list of supported environment variables.
+
+server:
+  port: 1374
+  # Comma-separated list of allowed CORS origins.
+  # Use ["*"] for development only. Set specific origins in production.
+  cors_origins:
+    - "*"
+
+database:
+  host: localhost
+  port: 5432
+  user: seyhounapp
+  password: "your_password_here"
+  name: seyhoundb
+  sslmode: disable
+  timezone: UTC
+
+auth:
+  # REQUIRED: Change this to a long random secret before deploying.
+  # Generate one with: openssl rand -hex 32
+  jwt_secret: "change-me-in-production"
+
+log:
+  level: info

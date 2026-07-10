@@ -1,0 +1,8 @@
+- Pagination on list endpoints
+- Rate limiting
+- Refresh token rotation
+- N+1 query optimization (IsFastForward, RBAC)
+- Map iteration determinism in diff/merge
+- Repository/store interfaces for unit testing without DB
+- i18n, accessibility (ARIA), offline handling
+- Component-level tests (React Testing Library)
