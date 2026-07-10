@@ -1,19 +1,31 @@
 # Seyhoun
 
-A self-hostable architecture diagramming tool with git-like versioning, multi-user workspaces, and support for infrastructure, UML, ER, and sequence diagrams.
+A self-hostable architecture and UML diagramming tool with git-like versioning, multi-user workspaces, and support for 12 diagram types.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.23-00ADD8)](https://go.dev/)
 
 ---
 
 ## Features
 
-- **9 diagram types** — architecture, network, platform, deployment, component, UML class/state/activity/use-case/sequence, ER, flowchart
+- **12 diagram types** — architecture, network, platform, deployment, component, sequence, class, ER, flowchart, state machine, activity, use case
 - **Git-like versioning** — every save creates a commit; browse history and revert to any prior state
 - **Workspaces & projects** — multi-tenant hierarchy with role-based access (owner → developer → viewer)
 - **Export / Import** — JSON round-trip and PNG export; import from Docker Compose and Terraform
+- **Per-diagram edge types** — each diagram type exposes only the relevant relationship kinds (e.g. inheritance/composition for class, transition for state machine, message types for sequence)
+- **Rich UML palette** — full element sets per diagram type: lifelines, fragments, swim lanes, fork/join, signal nodes, composite states, and more
 - **Self-hostable** — single binary serving the frontend, backed by PostgreSQL
+
+---
+
+## Diagram Types
+
+| Family | Types |
+|---|---|
+| **Infrastructure** | Architecture, Network, Platform, Deployment, Component |
+| **UML** | Sequence, Class, State Machine, Activity, Use Case |
+| **Other** | ER Diagram, Flowchart |
 
 ---
 
@@ -44,7 +56,7 @@ docker compose exec app seyhoun migrate up
 
 ### Prerequisites
 
-- Go 1.25+
+- Go 1.23+
 - Node.js 20+
 - PostgreSQL 15+
 
@@ -124,11 +136,21 @@ migrations/
   003_assign_projects.go        Data migration
   004_diagram_branch_commit.go  Data migration
 web/src/
-  modes/                HomePage, SchemaPage, LoginPage, MonitorMode, PresentMode
-  components/           Canvas, panels, nodes, layout, ErrorBoundary
+  modes/                HomePage, SchemaPage, DesignMode, PresentMode, MonitorMode
+  components/
+    canvas/             ArchCanvas, nodeTypes registry
+    edges/              UmlEdge (all UML relationship and sequence message types)
+    nodes/              BaseNode (infra), FlowchartNode, StateNode, ClassNode, EntityNode,
+                        ActivityNode, ActorNode, UseCaseNode, SystemBoundaryNode,
+                        LifelineNode, MessageNode, FragmentNode
+    panels/             Per-diagram-type inspectors, EdgeInspector, VersionHistory
+    layout/             Sidebar (element palette + project tree), TopBar
   stores/               Zustand stores: diagram, auth, ui
-  lib/                  api.ts, techRegistry.ts, elementRegistry.ts
-  types/                TypeScript types
+  lib/
+    api.ts              Typed fetch wrapper for all API calls
+    techRegistry.ts     Infrastructure palette + DIAGRAM_TYPES registry
+    elementRegistry.ts  UML element palette, category groups, per-diagram edge config
+  types/diagram.ts      TypeScript types, ElementKind union, node data interfaces, type guards
 ```
 
 ---
@@ -157,12 +179,15 @@ All endpoints are under `/api` and require a JWT bearer token unless noted.
 | Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `PUT /auth/me` |
 | Workspaces | `GET /workspaces`, `POST /workspaces`, `GET /workspaces/:id` … |
 | Projects | `GET /projects`, `POST /projects`, `GET /projects/:id` … |
-| Diagrams | `GET /diagrams/:id`, `POST /projects/:id/diagrams`, `DELETE /diagrams/:id` |
+| Diagrams | `GET /diagrams/:id`, `POST /projects/:id/diagrams`, `PUT /diagrams/:id`, `DELETE /diagrams/:id` |
 | Commits | `GET /diagrams/:id/commits`, `POST /branches/:id/commits`, `POST /diagrams/:id/revert/:commitId` |
 | Branches | `GET /diagrams/:id/branches`, `POST /diagrams/:id/branches` |
-| Import | `POST /diagrams/:id/import` |
+| Import | `POST /import/json`, `POST /import/compose`, `POST /import/terraform` |
 | Export | `GET /diagrams/:id/export` |
+| Templates | `GET /templates`, `GET /templates/:id` |
 | Health | `GET /health` (unauthenticated) |
+
+> **Saving diagram content** always goes through `POST /branches/:id/commits` — not `PUT /diagrams/:id`. The PUT endpoint only updates the diagram name and type.
 
 ---
 
