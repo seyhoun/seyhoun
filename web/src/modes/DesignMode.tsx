@@ -10,10 +10,16 @@ import { ClassNodeInspector } from '../components/panels/ClassNodeInspector'
 import { EntityNodeInspector } from '../components/panels/EntityNodeInspector'
 import { StateNodeInspector } from '../components/panels/StateNodeInspector'
 import { FlowchartNodeInspector } from '../components/panels/FlowchartNodeInspector'
+import { ActivityNodeInspector } from '../components/panels/ActivityNodeInspector'
+import { UseCaseNodeInspector } from '../components/panels/UseCaseNodeInspector'
+import { SequenceNodeInspector } from '../components/panels/SequenceNodeInspector'
 import { useUIStore } from '../stores/ui'
 import { useDiagramStore } from '../stores/diagram'
 import { isInfraDiagramType } from '../lib/elementRegistry'
-import { isClassNodeData, isEntityNodeData, isStateNodeData, isFlowchartNodeData } from '../types/diagram'
+import {
+  isClassNodeData, isEntityNodeData, isStateNodeData, isFlowchartNodeData,
+  isActivityNodeData, isUseCaseNodeData, isSequenceNodeData,
+} from '../types/diagram'
 import { api } from '../lib/api'
 
 function NodeInspectorRouter() {
@@ -34,6 +40,9 @@ function NodeInspectorRouter() {
   if (isEntityNodeData(d))    return <EntityNodeInspector />
   if (isStateNodeData(d))     return <StateNodeInspector />
   if (isFlowchartNodeData(d)) return <FlowchartNodeInspector />
+  if (isActivityNodeData(d))  return <ActivityNodeInspector />
+  if (isUseCaseNodeData(d))   return <UseCaseNodeInspector />
+  if (isSequenceNodeData(d))  return <SequenceNodeInspector />
   return <UmlNodeInspector />
 }
 
@@ -115,6 +124,7 @@ export function DesignMode() {
           projectId: child.projectId,
           defaultBranchId: child.defaultBranchId,
           name: child.name,
+          diagramType: child.diagramType,
           nodes: JSON.parse(child.nodesJson || '[]'),
           edges: JSON.parse(child.edgesJson || '[]'),
         })

@@ -1,6 +1,15 @@
 import { useUIStore } from '../../stores/ui'
 import { useDiagramStore } from '../../stores/diagram'
-import type { StateNodeData } from '../../types/diagram'
+import type { StateNodeData, ElementKind } from '../../types/diagram'
+
+const STATE_KINDS: { value: ElementKind; label: string }[] = [
+  { value: 'state',           label: 'State' },
+  { value: 'composite-state', label: 'Composite State' },
+  { value: 'initial-state',   label: 'Initial (pseudo)' },
+  { value: 'final-state',     label: 'Final (pseudo)' },
+  { value: 'choice',          label: 'Choice (pseudo)' },
+  { value: 'history',         label: 'History (pseudo)' },
+]
 
 export function StateNodeInspector() {
   const { inspector } = useUIStore()
@@ -16,13 +25,29 @@ export function StateNodeInspector() {
     updateNodeData(inspector!.id, patch as never)
   }
 
-  const isPseudo = d.elementKind === 'initial-state' || d.elementKind === 'final-state'
+  const isPseudo = d.elementKind === 'initial-state' || d.elementKind === 'final-state' || d.elementKind === 'choice'
 
   return (
     <aside className="w-56 shrink-0 border-l border-border bg-surface overflow-y-auto p-3">
       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted mb-3">
-        {isPseudo ? 'Pseudo State' : 'State'}
+        State Element
       </p>
+
+      {/* Kind selector */}
+      <div className="mb-3">
+        <label className="block text-[10px] text-text-muted mb-1">Type</label>
+        <select
+          value={d.elementKind ?? 'state'}
+          onChange={(e) => set({ elementKind: e.target.value as ElementKind })}
+          className="w-full bg-elevated border border-border rounded-md
+            px-2 py-1.5 text-xs text-text-primary
+            focus:outline-none focus:border-violet-500/50 transition-colors"
+        >
+          {STATE_KINDS.map((k) => (
+            <option key={k.value} value={k.value}>{k.label}</option>
+          ))}
+        </select>
+      </div>
 
       {/* Label (not shown for pseudo-states) */}
       {!isPseudo && (

@@ -22,24 +22,37 @@ export type ElementKind =
   // Class diagram
   | 'class-box'
   | 'interface-box'
+  | 'abstract-class'
+  | 'enum-box'
+  | 'package'
   // ER diagram
   | 'entity'
   | 'weak-entity'
+  | 'relationship'
   // Flowchart
   | 'process'
   | 'decision'
   | 'terminal'
   | 'io-box'
   | 'connector'
+  | 'predefined-process'
+  | 'document'
+  | 'preparation'
   // State machine
   | 'state'
   | 'initial-state'
   | 'final-state'
   | 'composite-state'
+  | 'choice'
+  | 'history'
   // Activity
   | 'action'
   | 'fork-join'
   | 'decision-merge'
+  | 'swim-lane'
+  | 'signal-send'
+  | 'signal-receive'
+  | 'note'
   // Use case
   | 'actor'
   | 'use-case'
@@ -47,6 +60,10 @@ export type ElementKind =
   // Sequence
   | 'lifeline'
   | 'message'
+  | 'fragment'
+  | 'boundary-lifeline'
+  | 'control-lifeline'
+  | 'entity-lifeline'
 
 // ── Node taxonomy ────────────────────────────────────────────────────
 
@@ -140,6 +157,7 @@ export interface EntityNodeData extends Record<string, unknown> {
   label: string
   description?: string
   isWeak?: boolean
+  elementKind?: ElementKind
   attributes: EntityAttribute[]
 }
 
@@ -165,6 +183,7 @@ export interface ActivityNodeData extends Record<string, unknown> {
   label: string
   elementKind: ElementKind
   description?: string
+  guard?: string
 }
 
 export interface UseCaseNodeData extends Record<string, unknown> {
@@ -172,6 +191,9 @@ export interface UseCaseNodeData extends Record<string, unknown> {
   label: string
   elementKind: ElementKind
   description?: string
+  preconditions?: string
+  postconditions?: string
+  actorType?: 'primary' | 'secondary'
 }
 
 export interface SequenceNodeData extends Record<string, unknown> {
@@ -180,10 +202,14 @@ export interface SequenceNodeData extends Record<string, unknown> {
   elementKind: ElementKind
   // For lifelines
   participantType?: 'actor' | 'object' | 'boundary' | 'control' | 'entity'
+  stereotype?: string
   // For messages
   messageType?: 'sync' | 'async' | 'return' | 'create' | 'destroy'
   sourceLifelineId?: string
   targetLifelineId?: string
+  // For fragments
+  fragmentType?: 'alt' | 'loop' | 'opt' | 'break' | 'par'
+  fragmentCondition?: string
 }
 
 // ── Layered data structures ──────────────────────────────────────────

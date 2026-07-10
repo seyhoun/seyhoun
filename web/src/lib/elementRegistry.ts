@@ -2,7 +2,10 @@ import {
   Square, Diamond, Circle, ArrowRight, Play, Minus,
   User, Ellipsis, LayoutTemplate, AlignCenter,
   MessageSquare, Users, Activity, Share2,
-  Database, type LucideIcon,
+  Database, Layers, Send, Inbox, StickyNote, Frame,
+  FileText, Hexagon, GitBranch, History, Package,
+  List, Type, UserCheck,
+  type LucideIcon,
 } from 'lucide-react'
 import type { DiagramType, ElementKind, DiagramNodeData } from '../types/diagram'
 import type { TechColors } from './techRegistry'
@@ -48,7 +51,7 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
   },
   {
     elementKind: 'decision',
-    diagramTypes: ['flowchart', 'activity'],
+    diagramTypes: ['flowchart'],
     label: 'Decision',
     description: 'A yes/no branch point',
     Icon: Diamond,
@@ -72,6 +75,33 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
     Icon: ArrowRight,
     colors: flowColors,
     defaultData: { kind: 'flowchart', label: 'Input / Output', elementKind: 'io-box' },
+  },
+  {
+    elementKind: 'predefined-process',
+    diagramTypes: ['flowchart'],
+    label: 'Predefined Process',
+    description: 'A subprocess or named routine',
+    Icon: Square,
+    colors: flowColors,
+    defaultData: { kind: 'flowchart', label: 'Subprocess', elementKind: 'predefined-process' },
+  },
+  {
+    elementKind: 'document',
+    diagramTypes: ['flowchart'],
+    label: 'Document',
+    description: 'A document or report produced/consumed',
+    Icon: FileText,
+    colors: flowColors,
+    defaultData: { kind: 'flowchart', label: 'Document', elementKind: 'document' },
+  },
+  {
+    elementKind: 'preparation',
+    diagramTypes: ['flowchart'],
+    label: 'Preparation',
+    description: 'Initialization or setup step',
+    Icon: Hexagon,
+    colors: decisionColors,
+    defaultData: { kind: 'flowchart', label: 'Prepare', elementKind: 'preparation' },
   },
   {
     elementKind: 'connector',
@@ -111,6 +141,33 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
     colors: stateColors,
     defaultData: { kind: 'state', label: '', elementKind: 'final-state' },
   },
+  {
+    elementKind: 'composite-state',
+    diagramTypes: ['state_machine'],
+    label: 'Composite State',
+    description: 'A state containing nested sub-states',
+    Icon: Layers,
+    colors: stateColors,
+    defaultData: { kind: 'state', label: 'Composite', elementKind: 'composite-state' },
+  },
+  {
+    elementKind: 'choice',
+    diagramTypes: ['state_machine'],
+    label: 'Choice',
+    description: 'A dynamic choice pseudo-state',
+    Icon: GitBranch,
+    colors: decisionColors,
+    defaultData: { kind: 'state', label: '', elementKind: 'choice' },
+  },
+  {
+    elementKind: 'history',
+    diagramTypes: ['state_machine'],
+    label: 'History',
+    description: 'Shallow history pseudo-state',
+    Icon: History,
+    colors: stateColors,
+    defaultData: { kind: 'state', label: 'H', elementKind: 'history' },
+  },
 
   // ── Class Diagram ─────────────────────────────────────────────────
   {
@@ -143,6 +200,51 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
       methods: [],
     },
   },
+  {
+    elementKind: 'abstract-class',
+    diagramTypes: ['class'],
+    label: 'Abstract Class',
+    description: 'An abstract class that cannot be instantiated',
+    Icon: Type,
+    colors: classColors,
+    defaultData: {
+      kind: 'class',
+      label: 'AbstractName',
+      stereotype: 'abstract',
+      attributes: [],
+      methods: [],
+    },
+  },
+  {
+    elementKind: 'enum-box',
+    diagramTypes: ['class'],
+    label: 'Enumeration',
+    description: 'A fixed set of named constants',
+    Icon: List,
+    colors: classColors,
+    defaultData: {
+      kind: 'class',
+      label: 'EnumName',
+      stereotype: 'enumeration',
+      attributes: [],
+      methods: [],
+    },
+  },
+  {
+    elementKind: 'package',
+    diagramTypes: ['class'],
+    label: 'Package',
+    description: 'A namespace grouping classes',
+    Icon: Package,
+    colors: classColors,
+    defaultData: {
+      kind: 'class',
+      label: 'pkg',
+      stereotype: 'package',
+      attributes: [],
+      methods: [],
+    },
+  },
 
   // ── ER Diagram ────────────────────────────────────────────────────
   {
@@ -163,13 +265,28 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
     elementKind: 'weak-entity',
     diagramTypes: ['er'],
     label: 'Weak Entity',
-    description: 'An entity that depends on another',
+    description: 'An entity that depends on another entity',
     Icon: Database,
     colors: entityColors,
     defaultData: {
       kind: 'entity',
       label: 'WeakEntity',
       isWeak: true,
+      attributes: [],
+    },
+  },
+  {
+    elementKind: 'relationship',
+    diagramTypes: ['er'],
+    label: 'Relationship',
+    description: 'A relationship diamond between entities',
+    Icon: Diamond,
+    colors: entityColors,
+    defaultData: {
+      kind: 'entity',
+      label: 'relates',
+      isWeak: false,
+      elementKind: 'relationship',
       attributes: [],
     },
   },
@@ -220,22 +337,58 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
     colors: activityColors,
     defaultData: { kind: 'activity', label: '', elementKind: 'final-state' },
   },
+  {
+    elementKind: 'swim-lane',
+    diagramTypes: ['activity'],
+    label: 'Swim Lane',
+    description: 'A partition grouping related activities',
+    Icon: LayoutTemplate,
+    colors: activityColors,
+    defaultData: { kind: 'activity', label: 'Lane', elementKind: 'swim-lane' },
+  },
+  {
+    elementKind: 'signal-send',
+    diagramTypes: ['activity'],
+    label: 'Send Signal',
+    description: 'Sends a signal to another activity',
+    Icon: Send,
+    colors: activityColors,
+    defaultData: { kind: 'activity', label: 'Send Signal', elementKind: 'signal-send' },
+  },
+  {
+    elementKind: 'signal-receive',
+    diagramTypes: ['activity'],
+    label: 'Receive Signal',
+    description: 'Waits for an incoming signal',
+    Icon: Inbox,
+    colors: activityColors,
+    defaultData: { kind: 'activity', label: 'Receive Signal', elementKind: 'signal-receive' },
+  },
+  {
+    elementKind: 'note',
+    diagramTypes: ['activity', 'class', 'er', 'use_case', 'sequence', 'state_machine'],
+    label: 'Note',
+    description: 'A comment or annotation',
+    Icon: StickyNote,
+    colors: activityColors,
+    defaultData: { kind: 'activity', label: 'Note', elementKind: 'note' },
+  },
 
   // ── Use Case Diagram ──────────────────────────────────────────────
   {
     elementKind: 'actor',
-    diagramTypes: ['use_case', 'sequence'],
+    diagramTypes: ['use_case'],
     label: 'Actor',
-    description: 'An external actor or participant',
+    description: 'An external actor or stakeholder',
     Icon: User,
     colors: actorColors,
-    defaultData: { kind: 'use-case', label: 'Actor', elementKind: 'actor' },
+    defaultData: { kind: 'use-case', label: 'Actor', elementKind: 'actor', actorType: 'primary' },
   },
   {
     elementKind: 'use-case',
     diagramTypes: ['use_case'],
     label: 'Use Case',
-    description: 'A system use case',
+    description: 'A system use case or feature',
     Icon: Ellipsis,
     colors: usecaseColors,
     defaultData: { kind: 'use-case', label: 'Use Case', elementKind: 'use-case' },
@@ -244,7 +397,7 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
     elementKind: 'system-boundary',
     diagramTypes: ['use_case'],
     label: 'System Boundary',
-    description: 'System boundary grouping use cases',
+    description: 'A boundary grouping related use cases',
     Icon: LayoutTemplate,
     colors: usecaseColors,
     defaultData: { kind: 'use-case', label: 'System', elementKind: 'system-boundary' },
@@ -254,23 +407,82 @@ export const ELEMENT_REGISTRY: ElementDef[] = [
   {
     elementKind: 'lifeline',
     diagramTypes: ['sequence'],
-    label: 'Lifeline',
-    description: 'A participant in the sequence',
+    label: 'Object Lifeline',
+    description: 'A participant object in the sequence',
     Icon: Users,
     colors: seqColors,
-    defaultData: { kind: 'sequence', label: 'Participant', elementKind: 'lifeline', participantType: 'object' },
+    defaultData: { kind: 'sequence', label: 'Object', elementKind: 'lifeline', participantType: 'object' },
+  },
+  {
+    elementKind: 'actor',
+    diagramTypes: ['sequence'],
+    label: 'Actor Lifeline',
+    description: 'A human actor participant',
+    Icon: User,
+    colors: actorColors,
+    defaultData: { kind: 'sequence', label: 'Actor', elementKind: 'actor', participantType: 'actor' },
+  },
+  {
+    elementKind: 'boundary-lifeline',
+    diagramTypes: ['sequence'],
+    label: 'Boundary',
+    description: 'A boundary (UI, API) participant',
+    Icon: UserCheck,
+    colors: seqColors,
+    defaultData: { kind: 'sequence', label: 'UI', elementKind: 'boundary-lifeline', participantType: 'boundary' },
+  },
+  {
+    elementKind: 'control-lifeline',
+    diagramTypes: ['sequence'],
+    label: 'Control',
+    description: 'A control (service, controller) participant',
+    Icon: Activity,
+    colors: seqColors,
+    defaultData: { kind: 'sequence', label: 'Controller', elementKind: 'control-lifeline', participantType: 'control' },
+  },
+  {
+    elementKind: 'entity-lifeline',
+    diagramTypes: ['sequence'],
+    label: 'Entity',
+    description: 'A persistent data entity participant',
+    Icon: Database,
+    colors: seqColors,
+    defaultData: { kind: 'sequence', label: 'Entity', elementKind: 'entity-lifeline', participantType: 'entity' },
   },
   {
     elementKind: 'message',
     diagramTypes: ['sequence'],
-    label: 'Message',
-    description: 'A message between lifelines',
+    label: 'Message (sync)',
+    description: 'A synchronous call message',
     Icon: MessageSquare,
     colors: seqColors,
     defaultData: { kind: 'sequence', label: 'message()', elementKind: 'message', messageType: 'sync' },
   },
+  {
+    elementKind: 'fragment',
+    diagramTypes: ['sequence'],
+    label: 'Fragment',
+    description: 'A combined fragment (alt, loop, opt, break, par)',
+    Icon: Frame,
+    colors: seqColors,
+    defaultData: { kind: 'sequence', label: 'alt', elementKind: 'fragment', fragmentType: 'alt', fragmentCondition: '' },
+  },
 ]
 
+// ── ELEMENT_MAP: keyed by diagramType+elementKind to avoid collisions ────
+
+/**
+ * Lookup a default ElementDef for a given elementKind in the context of a specific diagram type.
+ * Falls back to the first match by elementKind alone if no type-specific match exists.
+ */
+export function getElementForDiagram(kind: ElementKind, diagramType: DiagramType): ElementDef {
+  const match = ELEMENT_REGISTRY.find(
+    (e) => e.elementKind === kind && e.diagramTypes.includes(diagramType)
+  )
+  return match ?? ELEMENT_REGISTRY.find((e) => e.elementKind === kind) ?? ELEMENT_REGISTRY[0]
+}
+
+/** Fallback for contexts where diagramType is not available (e.g. existing code). */
 export const ELEMENT_MAP = new Map<ElementKind, ElementDef>(
   ELEMENT_REGISTRY.map((e) => [e.elementKind, e])
 )
@@ -293,36 +505,77 @@ export interface UmlCategory {
 }
 
 export const UML_CATEGORIES: UmlCategory[] = [
+  // ── Flowchart ───────────────────────────────────────────────────
   {
     id: 'flowchart-shapes',
     label: 'Shapes',
     diagramTypes: ['flowchart'],
-    elementKinds: ['process', 'decision', 'terminal', 'io-box', 'connector'],
+    elementKinds: ['process', 'predefined-process', 'decision', 'terminal', 'io-box', 'document', 'preparation', 'connector'],
   },
+
+  // ── State Machine ───────────────────────────────────────────────
   {
     id: 'state-elements',
     label: 'States',
     diagramTypes: ['state_machine'],
-    elementKinds: ['state', 'initial-state', 'final-state'],
+    elementKinds: ['state', 'composite-state', 'initial-state', 'final-state', 'choice', 'history'],
   },
   {
-    id: 'class-elements',
+    id: 'state-notes',
+    label: 'Annotations',
+    diagramTypes: ['state_machine'],
+    elementKinds: ['note'],
+  },
+
+  // ── Class Diagram ───────────────────────────────────────────────
+  {
+    id: 'class-classifiers',
     label: 'Classifiers',
     diagramTypes: ['class'],
-    elementKinds: ['class-box', 'interface-box'],
+    elementKinds: ['class-box', 'abstract-class', 'interface-box', 'enum-box', 'package'],
   },
+  {
+    id: 'class-notes',
+    label: 'Annotations',
+    diagramTypes: ['class'],
+    elementKinds: ['note'],
+  },
+
+  // ── ER Diagram ──────────────────────────────────────────────────
   {
     id: 'er-elements',
     label: 'Entities',
     diagramTypes: ['er'],
-    elementKinds: ['entity', 'weak-entity'],
+    elementKinds: ['entity', 'weak-entity', 'relationship'],
   },
   {
-    id: 'activity-elements',
-    label: 'Activities',
+    id: 'er-notes',
+    label: 'Annotations',
+    diagramTypes: ['er'],
+    elementKinds: ['note'],
+  },
+
+  // ── Activity Diagram ────────────────────────────────────────────
+  {
+    id: 'activity-control',
+    label: 'Control Flow',
     diagramTypes: ['activity'],
     elementKinds: ['action', 'decision-merge', 'fork-join', 'initial-state', 'final-state'],
   },
+  {
+    id: 'activity-signals',
+    label: 'Signals',
+    diagramTypes: ['activity'],
+    elementKinds: ['signal-send', 'signal-receive'],
+  },
+  {
+    id: 'activity-layout',
+    label: 'Layout',
+    diagramTypes: ['activity'],
+    elementKinds: ['swim-lane', 'note'],
+  },
+
+  // ── Use Case ────────────────────────────────────────────────────
   {
     id: 'usecase-elements',
     label: 'Elements',
@@ -330,16 +583,36 @@ export const UML_CATEGORIES: UmlCategory[] = [
     elementKinds: ['actor', 'use-case', 'system-boundary'],
   },
   {
-    id: 'sequence-elements',
+    id: 'usecase-notes',
+    label: 'Annotations',
+    diagramTypes: ['use_case'],
+    elementKinds: ['note'],
+  },
+
+  // ── Sequence ────────────────────────────────────────────────────
+  {
+    id: 'sequence-participants',
     label: 'Participants',
     diagramTypes: ['sequence'],
-    elementKinds: ['lifeline', 'actor'],
+    elementKinds: ['lifeline', 'actor', 'boundary-lifeline', 'control-lifeline', 'entity-lifeline'],
   },
   {
     id: 'sequence-messages',
     label: 'Messages',
     diagramTypes: ['sequence'],
     elementKinds: ['message'],
+  },
+  {
+    id: 'sequence-fragments',
+    label: 'Fragments',
+    diagramTypes: ['sequence'],
+    elementKinds: ['fragment'],
+  },
+  {
+    id: 'sequence-notes',
+    label: 'Annotations',
+    diagramTypes: ['sequence'],
+    elementKinds: ['note'],
   },
 ]
 
@@ -357,12 +630,24 @@ export function isInfraDiagramType(type: DiagramType): boolean {
   return INFRA_TYPES.has(type)
 }
 
+// ── UML edge type key ──────────────────────────────────────────────────
 
-// UML edge type keys
 export const UML_EDGE_TYPE = 'uml-edge'
 
-// Edge types for display in inspector
-export const UML_EDGE_KINDS = [
+// ── Per-diagram edge kinds ─────────────────────────────────────────────
+
+export type UmlEdgeKind =
+  | 'association'
+  | 'inheritance'
+  | 'composition'
+  | 'aggregation'
+  | 'dependency'
+  | 'realization'
+  | 'include'
+  | 'extend'
+  | 'transition'
+
+export const ALL_UML_EDGE_KINDS: { value: UmlEdgeKind; label: string }[] = [
   { value: 'association',  label: 'Association' },
   { value: 'inheritance',  label: 'Inheritance / Generalization' },
   { value: 'composition',  label: 'Composition' },
@@ -372,9 +657,42 @@ export const UML_EDGE_KINDS = [
   { value: 'include',      label: '«include»' },
   { value: 'extend',       label: '«extend»' },
   { value: 'transition',   label: 'Transition' },
-] as const
+]
 
-// Message types for sequence diagrams
+/** Which edge kinds are meaningful for each diagram type, and which is the default. */
+export const DIAGRAM_EDGE_CONFIG: Record<DiagramType, {
+  kinds: UmlEdgeKind[]
+  default: UmlEdgeKind
+}> = {
+  architecture: { kinds: ['association'], default: 'association' },
+  network:      { kinds: ['association'], default: 'association' },
+  platform:     { kinds: ['association'], default: 'association' },
+  deployment:   { kinds: ['association'], default: 'association' },
+  component:    { kinds: ['association', 'dependency', 'realization'], default: 'association' },
+  flowchart:    { kinds: ['association'], default: 'association' },
+  state_machine: { kinds: ['transition'], default: 'transition' },
+  activity:     { kinds: ['association'], default: 'association' },
+  class:        { kinds: ['association', 'inheritance', 'composition', 'aggregation', 'dependency', 'realization'], default: 'association' },
+  er:           { kinds: ['association'], default: 'association' },
+  use_case:     { kinds: ['association', 'include', 'extend', 'inheritance'], default: 'association' },
+  sequence:     { kinds: ['association'], default: 'association' }, // sequence uses messageType, not edgeKind
+}
+
+export function getEdgeKindsForDiagram(type: DiagramType): { value: UmlEdgeKind; label: string }[] {
+  const cfg = DIAGRAM_EDGE_CONFIG[type]
+  if (!cfg) return ALL_UML_EDGE_KINDS
+  return ALL_UML_EDGE_KINDS.filter((k) => cfg.kinds.includes(k.value))
+}
+
+export function getDefaultEdgeKind(type: DiagramType): UmlEdgeKind {
+  return DIAGRAM_EDGE_CONFIG[type]?.default ?? 'association'
+}
+
+// ── UML_EDGE_KINDS kept for backward compatibility ─────────────────────
+export const UML_EDGE_KINDS = ALL_UML_EDGE_KINDS
+
+// ── Message types for sequence diagrams ───────────────────────────────
+
 export const SEQUENCE_MESSAGE_TYPES = [
   { value: 'sync',    label: 'Synchronous call' },
   { value: 'async',   label: 'Asynchronous call' },

@@ -15,6 +15,7 @@ import { ActorNode } from '../../nodes/ActorNode'
 import { UseCaseNode } from '../../nodes/UseCaseNode'
 import { SystemBoundaryNode } from '../../nodes/SystemBoundaryNode'
 import { LifelineNode, MessageNode } from '../../nodes/LifelineNode'
+import { FragmentNode } from '../../nodes/FragmentNode'
 import { UmlEdge } from '../../edges/UmlEdge'
 
 /** Every infrastructure technology key maps to the generic BaseNode renderer. */
@@ -24,27 +25,51 @@ export const INFRA_NODE_TYPES: NodeTypes = Object.fromEntries(
 
 /** UML element kinds mapped to their specialised node renderers. */
 export const UML_NODE_TYPES: NodeTypes = {
-  'process':          FlowchartNode,
-  'decision':         FlowchartNode,
-  'terminal':         FlowchartNode,
-  'io-box':           FlowchartNode,
-  'connector':        FlowchartNode,
-  'state':            StateNode,
-  'initial-state':    StateNode,
-  'final-state':      StateNode,
-  'composite-state':  StateNode,
-  'class-box':        ClassNode,
-  'interface-box':    ClassNode,
-  'entity':           EntityNode,
-  'weak-entity':      EntityNode,
-  'action':           ActivityNode,
-  'decision-merge':   ActivityNode,
-  'fork-join':        ActivityNode,
-  'actor':            ActorNode,
-  'use-case':         UseCaseNode,
-  'system-boundary':  SystemBoundaryNode,
-  'lifeline':         LifelineNode,
-  'message':          MessageNode,
+  // Flowchart
+  'process':           FlowchartNode,
+  'decision':          FlowchartNode,
+  'terminal':          FlowchartNode,
+  'io-box':            FlowchartNode,
+  'predefined-process':FlowchartNode,
+  'document':          FlowchartNode,
+  'preparation':       FlowchartNode,
+  'connector':         FlowchartNode,
+  // State machine
+  'state':             StateNode,
+  'initial-state':     StateNode,
+  'final-state':       StateNode,
+  'composite-state':   StateNode,
+  'choice':            StateNode,
+  'history':           StateNode,
+  // Class
+  'class-box':         ClassNode,
+  'interface-box':     ClassNode,
+  'abstract-class':    ClassNode,
+  'enum-box':          ClassNode,
+  'package':           ClassNode,
+  // ER
+  'entity':            EntityNode,
+  'weak-entity':       EntityNode,
+  'relationship':      EntityNode,
+  // Activity
+  'action':            ActivityNode,
+  'decision-merge':    ActivityNode,
+  'fork-join':         ActivityNode,
+  'swim-lane':         ActivityNode,
+  'signal-send':       ActivityNode,
+  'signal-receive':    ActivityNode,
+  'note':              ActivityNode,
+  // Use case
+  'actor':             ActorNode,
+  'use-case':          UseCaseNode,
+  'system-boundary':   SystemBoundaryNode,
+  // Sequence
+  'lifeline':          LifelineNode,
+  'boundary-lifeline': LifelineNode,
+  'control-lifeline':  LifelineNode,
+  'entity-lifeline':   LifelineNode,
+  'message':           MessageNode,
+  'fragment':          FragmentNode,
 }
 
 /** Custom edge types for UML diagrams. */
@@ -59,7 +84,7 @@ export const INFRA_EDGE_DEFAULTS = {
   style: { stroke: '#4a4f6a', strokeWidth: 1.5 },
 }
 
-/** Default edge style for UML diagrams. */
+/** Default edge style for UML diagrams (data is set per-diagram in onConnect). */
 export const UML_EDGE_DEFAULTS = {
   type: UML_EDGE_TYPE,
   style: { stroke: '#4a4f6a', strokeWidth: 1.5 },

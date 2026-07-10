@@ -3,11 +3,14 @@ import { useDiagramStore } from '../../stores/diagram'
 import type { FlowchartNodeData, ElementKind } from '../../types/diagram'
 
 const SHAPES: { value: ElementKind; label: string }[] = [
-  { value: 'process',   label: 'Process' },
-  { value: 'decision',  label: 'Decision' },
-  { value: 'terminal',  label: 'Terminal (Start / End)' },
-  { value: 'io-box',    label: 'Input / Output' },
-  { value: 'connector', label: 'Connector' },
+  { value: 'process',             label: 'Process' },
+  { value: 'predefined-process',  label: 'Predefined Process (Subprocess)' },
+  { value: 'decision',            label: 'Decision' },
+  { value: 'terminal',            label: 'Terminal (Start / End)' },
+  { value: 'io-box',              label: 'Input / Output' },
+  { value: 'document',            label: 'Document' },
+  { value: 'preparation',         label: 'Preparation (Hexagon)' },
+  { value: 'connector',           label: 'Connector' },
 ]
 
 export function FlowchartNodeInspector() {

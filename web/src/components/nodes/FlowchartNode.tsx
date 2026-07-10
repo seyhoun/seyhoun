@@ -117,6 +117,77 @@ export function FlowchartNode({ data, selected, id }: NodeProps<ArchNode>) {
     )
   }
 
+  // ── Predefined process (double-bordered rectangle — subprocess) ─────
+  if (d.elementKind === 'predefined-process') {
+    return (
+      <div className="relative">
+        <NodeHandles />
+        {isDesign && selected && <NodeDeleteButton nodeId={id} />}
+        <div
+          className={`
+            px-4 py-2.5 rounded-lg border-2 bg-elevated select-none
+            transition-all duration-150 min-w-[120px] max-w-[220px]
+            ${colors.border} ${selectedRing}
+          `}
+        >
+          <div className={`absolute inset-y-2 left-2 w-px ${colors.border} border-l`} />
+          <div className={`absolute inset-y-2 right-2 w-px ${colors.border} border-r`} />
+          <p className="text-xs font-semibold text-text-primary text-center leading-tight px-2">
+            {d.label}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Document (wavy-bottom rectangle) ────────────────────────────────
+  if (d.elementKind === 'document') {
+    const w = 140, h = 50
+    return (
+      <div className="relative" style={{ width: w, height: h + 10 }}>
+        <NodeHandles />
+        {isDesign && selected && <NodeDeleteButton nodeId={id} />}
+        <svg width={w} height={h + 10} className="overflow-visible absolute inset-0">
+          <path
+            d={`M0,0 L${w},0 L${w},${h} Q${w * 0.75},${h + 14} ${w / 2},${h} Q${w * 0.25},${h - 14} 0,${h} Z`}
+            fill="#1a1c2e"
+            stroke={selected ? '#38bdf8' : '#0ea5e988'}
+            strokeWidth="1.5"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center pb-2">
+          <span className="text-[11px] font-semibold text-text-primary text-center px-2 leading-tight">
+            {d.label}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Preparation (hexagon) ────────────────────────────────────────────
+  if (d.elementKind === 'preparation') {
+    const w = 140, h = 48, notch = 20
+    return (
+      <div className="relative" style={{ width: w, height: h }}>
+        <NodeHandles />
+        {isDesign && selected && <NodeDeleteButton nodeId={id} />}
+        <svg width={w} height={h} className="overflow-visible">
+          <polygon
+            points={`${notch},0 ${w - notch},0 ${w},${h / 2} ${w - notch},${h} ${notch},${h} 0,${h / 2}`}
+            fill="#1a1c2e"
+            stroke={selected ? '#fbbf24' : '#d97706aa'}
+            strokeWidth="1.5"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[11px] font-semibold text-text-primary text-center px-6 leading-tight">
+            {d.label}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
   // ── Process (default — rounded rectangle) ──────────────────────────
   return (
     <div className="relative">

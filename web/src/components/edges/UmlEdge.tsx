@@ -8,10 +8,13 @@ import type { ArchEdge, EdgeData } from '../../types/diagram'
 
 // SVG marker IDs — injected into the React Flow SVG via <defs>
 export const UML_MARKER_IDS = {
-  hollowTriangle:  'uml-hollow-triangle',
-  filledDiamond:   'uml-filled-diamond',
-  hollowDiamond:   'uml-hollow-diamond',
-  openArrow:       'uml-open-arrow',
+  hollowTriangle:   'uml-hollow-triangle',
+  filledDiamond:    'uml-filled-diamond',
+  hollowDiamond:    'uml-hollow-diamond',
+  openArrow:        'uml-open-arrow',
+  filledArrow:      'uml-filled-arrow',
+  halfOpenArrow:    'uml-half-open-arrow',
+  destroyX:         'uml-destroy-x',
 }
 
 /** Inject SVG marker defs once into the page. Call this in ArchCanvas. */
@@ -49,7 +52,7 @@ export function UmlMarkerDefs() {
           <polygon points="0,5 5,0 10,5 5,10" fill="#1a1c2e" stroke="#6b7280" strokeWidth="1" />
         </marker>
 
-        {/* Dependency — open arrowhead */}
+        {/* Dependency / include / extend — open arrowhead */}
         <marker
           id={UML_MARKER_IDS.openArrow}
           markerWidth="10" markerHeight="10"
@@ -57,6 +60,37 @@ export function UmlMarkerDefs() {
           orient="auto"
         >
           <polyline points="1,1 9,5 1,9" fill="none" stroke="#6b7280" strokeWidth="1.5" />
+        </marker>
+
+        {/* Sequence sync call — filled arrowhead */}
+        <marker
+          id={UML_MARKER_IDS.filledArrow}
+          markerWidth="10" markerHeight="10"
+          refX="9" refY="5"
+          orient="auto"
+        >
+          <polygon points="0,0 10,5 0,10" fill="#fb7185" stroke="none" />
+        </marker>
+
+        {/* Sequence async / return — half-open arrowhead */}
+        <marker
+          id={UML_MARKER_IDS.halfOpenArrow}
+          markerWidth="10" markerHeight="10"
+          refX="9" refY="5"
+          orient="auto"
+        >
+          <polyline points="0,0 10,5 0,10" fill="none" stroke="#fb7185" strokeWidth="1.5" />
+        </marker>
+
+        {/* Sequence destroy — X marker */}
+        <marker
+          id={UML_MARKER_IDS.destroyX}
+          markerWidth="12" markerHeight="12"
+          refX="6" refY="6"
+          orient="auto"
+        >
+          <line x1="1" y1="1" x2="11" y2="11" stroke="#fb7185" strokeWidth="2" />
+          <line x1="11" y1="1" x2="1" y2="11" stroke="#fb7185" strokeWidth="2" />
         </marker>
       </defs>
     </svg>
@@ -73,21 +107,75 @@ export function UmlEdge({
   selected,
 }: EdgeProps<ArchEdge>) {
   const d = (data ?? {}) as EdgeData
-  const edgeKind = d.edgeKind ?? 'association'
+  const edgeKind   = d.edgeKind ?? 'association'
+  const messageType = d.messageType
 
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
   })
 
-  // Stroke style
-  const isDashed    = edgeKind === 'dependency' || edgeKind === 'realization' || edgeKind === 'include' || edgeKind === 'extend'
-  const strokeColor = selected ? '#a5b4fc' : '#4a4f6a'
-  const strokeWidth = selected ? 2 : 1.5
+  const selectedColor = selected ? '#a5b4fc' : '#4a4f6a'
+  const strokeWidth   = selected ? 2 : 1.5
 
-  // Marker at end (target side)
+  // ── Sequence diagram: messageType-based rendering ─────────────────
+  if (messageType) {
+    const isReturn  = messageType === 'return'
+    const isAsync   = messageType === 'async'
+    const isCreate  = messageType === 'create'
+    const isDestroy = messageType === 'destroy'
+
+    const seqColor  = selected ? '#fda4af' : '#fb7185'
+    const isDashed  = isReturn || isCreate
+    let markerEnd: string | undefined
+
+    if (isDestroy) {
+      markerEnd = `url(#${UML_MARKER_IDS.destroyX})`
+    } else if (isAsync || isReturn) {
+      markerEnd = `url(#${UML_MARKER_IDS.halfOpenArrow})`
+    } else {
+      // sync, create
+      markerEnd = `url(#${UML_MARKER_IDS.filledArrow})`
+    }
+
+    const autoLabel = isCreate ? '«create»' : isDestroy ? '«destroy»' : ''
+    const displayLabel = (d.label as string | undefined) ?? autoLabel
+
+    return (
+      <>
+        <BaseEdge
+          id={id}
+          path={edgePath}
+          style={{
+            stroke: seqColor,
+            strokeWidth,
+            strokeDasharray: isDashed ? '6 3' : undefined,
+            markerEnd,
+          }}
+        />
+        <EdgeLabelRenderer>
+          {displayLabel && (
+            <div
+              style={{
+                position: 'absolute',
+                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                pointerEvents: 'all',
+              }}
+              className="bg-elevated/80 text-[10px] text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/30 font-mono select-none"
+            >
+              {displayLabel}
+            </div>
+          )}
+        </EdgeLabelRenderer>
+      </>
+    )
+  }
+
+  // ── Standard UML edge rendering ────────────────────────────────────
+  const isDashed = edgeKind === 'dependency' || edgeKind === 'realization'
+    || edgeKind === 'include' || edgeKind === 'extend'
+
   let markerEnd: string | undefined
-  // Marker at start (source side) — for composition/aggregation diamonds
   let markerStart: string | undefined
 
   switch (edgeKind) {
@@ -97,11 +185,9 @@ export function UmlEdge({
       break
     case 'composition':
       markerStart = `url(#${UML_MARKER_IDS.filledDiamond})`
-      markerEnd   = undefined
       break
     case 'aggregation':
       markerStart = `url(#${UML_MARKER_IDS.hollowDiamond})`
-      markerEnd   = undefined
       break
     case 'dependency':
     case 'include':
@@ -109,12 +195,16 @@ export function UmlEdge({
       markerEnd = `url(#${UML_MARKER_IDS.openArrow})`
       break
     default:
-      // association, transition — use default closed arrowhead
-      markerEnd = undefined
+      // association, transition — plain line, no marker (or small closed arrow added below)
       break
   }
 
-  // Effective label: prefer data.label, then the edge label prop, then stereotype for include/extend
+  // Association and transition get a simple open arrow
+  if (!markerEnd && !markerStart) {
+    markerEnd = `url(#${UML_MARKER_IDS.openArrow})`
+  }
+
+  // Effective label
   let displayLabel = (d.label as string | undefined) ?? (label as string | undefined) ?? ''
   if (!displayLabel && edgeKind === 'include')  displayLabel = '«include»'
   if (!displayLabel && edgeKind === 'extend')   displayLabel = '«extend»'
@@ -136,7 +226,7 @@ export function UmlEdge({
         id={id}
         path={edgePath}
         style={{
-          stroke: strokeColor,
+          stroke: selectedColor,
           strokeWidth,
           strokeDasharray: isDashed ? '6 3' : undefined,
           markerEnd,
@@ -145,7 +235,6 @@ export function UmlEdge({
       />
 
       <EdgeLabelRenderer>
-        {/* Main label */}
         {fullLabel && (
           <div
             style={{
@@ -159,7 +248,6 @@ export function UmlEdge({
           </div>
         )}
 
-        {/* Cardinality labels */}
         {cardSource && (
           <div
             style={{

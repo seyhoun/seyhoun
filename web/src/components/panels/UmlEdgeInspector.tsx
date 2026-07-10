@@ -1,6 +1,6 @@
 import { useUIStore } from '../../stores/ui'
 import { useDiagramStore } from '../../stores/diagram'
-import { UML_EDGE_KINDS, SEQUENCE_MESSAGE_TYPES } from '../../lib/elementRegistry'
+import { getEdgeKindsForDiagram, SEQUENCE_MESSAGE_TYPES } from '../../lib/elementRegistry'
 import type { EdgeData } from '../../types/diagram'
 
 export function UmlEdgeInspector() {
@@ -13,6 +13,7 @@ export function UmlEdgeInspector() {
 
   const d = (edge.data ?? {}) as EdgeData
   const isSequence = diagramType === 'sequence'
+  const edgeKinds = getEdgeKindsForDiagram(diagramType)
 
   function setData(patch: Partial<EdgeData>) {
     updateEdge(inspector!.id, { data: patch })
@@ -38,7 +39,7 @@ export function UmlEdgeInspector() {
       </div>
 
       {isSequence ? (
-        // ── Sequence message type ────────────────────────────────────
+        // ── Sequence: message type ───────────────────────────────────
         <div className="mb-3">
           <label className="block text-[10px] text-text-muted mb-1">Message type</label>
           <select
@@ -46,7 +47,7 @@ export function UmlEdgeInspector() {
             onChange={(e) => setData({ messageType: e.target.value as EdgeData['messageType'] })}
             className="w-full bg-elevated border border-border rounded-md
               px-2 py-1.5 text-xs text-text-primary
-              focus:outline-none focus:border-indigo-500/50 transition-colors"
+              focus:outline-none focus:border-rose-500/50 transition-colors"
           >
             {SEQUENCE_MESSAGE_TYPES.map((t) => (
               <option key={t.value} value={t.value}>{t.label}</option>
@@ -55,30 +56,32 @@ export function UmlEdgeInspector() {
         </div>
       ) : (
         <>
-          {/* Edge kind */}
-          <div className="mb-3">
-            <label className="block text-[10px] text-text-muted mb-1">Relationship</label>
-            <select
-              value={d.edgeKind ?? 'association'}
-              onChange={(e) => setData({ edgeKind: e.target.value as EdgeData['edgeKind'] })}
-              className="w-full bg-elevated border border-border rounded-md
-                px-2 py-1.5 text-xs text-text-primary
-                focus:outline-none focus:border-indigo-500/50 transition-colors"
-            >
-              {UML_EDGE_KINDS.map((k) => (
-                <option key={k.value} value={k.value}>{k.label}</option>
-              ))}
-            </select>
-          </div>
+          {/* Edge kind — filtered to what's relevant for this diagram type */}
+          {edgeKinds.length > 0 && (
+            <div className="mb-3">
+              <label className="block text-[10px] text-text-muted mb-1">Relationship</label>
+              <select
+                value={d.edgeKind ?? edgeKinds[0].value}
+                onChange={(e) => setData({ edgeKind: e.target.value as EdgeData['edgeKind'] })}
+                className="w-full bg-elevated border border-border rounded-md
+                  px-2 py-1.5 text-xs text-text-primary
+                  focus:outline-none focus:border-indigo-500/50 transition-colors"
+              >
+                {edgeKinds.map((k) => (
+                  <option key={k.value} value={k.value}>{k.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
-          {/* Guard (state machine / activity) */}
+          {/* Guard — state machine, activity, flowchart */}
           {(diagramType === 'state_machine' || diagramType === 'activity' || diagramType === 'flowchart') && (
             <div className="mb-3">
               <label className="block text-[10px] text-text-muted mb-1">Guard</label>
               <input
                 value={d.guard as string ?? ''}
                 onChange={(e) => setData({ guard: e.target.value })}
-                placeholder="condition"
+                placeholder="[condition]"
                 className="w-full bg-elevated border border-border rounded-md
                   px-2 py-1.5 text-xs text-text-primary font-mono
                   focus:outline-none focus:border-indigo-500/50 transition-colors"
@@ -86,14 +89,14 @@ export function UmlEdgeInspector() {
             </div>
           )}
 
-          {/* Action (state machine) */}
+          {/* Action — state machine only */}
           {diagramType === 'state_machine' && (
             <div className="mb-3">
               <label className="block text-[10px] text-text-muted mb-1">Action</label>
               <input
                 value={d.action as string ?? ''}
                 onChange={(e) => setData({ action: e.target.value })}
-                placeholder="/ action"
+                placeholder="/ doSomething()"
                 className="w-full bg-elevated border border-border rounded-md
                   px-2 py-1.5 text-xs text-text-primary font-mono
                   focus:outline-none focus:border-indigo-500/50 transition-colors"
@@ -101,7 +104,7 @@ export function UmlEdgeInspector() {
             </div>
           )}
 
-          {/* Cardinality (class / ER) */}
+          {/* Cardinality — class and ER */}
           {(diagramType === 'class' || diagramType === 'er') && (
             <div className="mb-3 space-y-2">
               <label className="block text-[10px] text-text-muted">Cardinality</label>

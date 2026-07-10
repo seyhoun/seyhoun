@@ -9,7 +9,7 @@ import {
   type Connection,
 } from '@xyflow/react'
 import type { ArchNode, ArchEdge, DiagramNodeData, EdgeData, BreadcrumbItem, DiagramType } from '../types/diagram'
-import { isInfraDiagramType, UML_EDGE_TYPE } from '../lib/elementRegistry'
+import { isInfraDiagramType, UML_EDGE_TYPE, getDefaultEdgeKind } from '../lib/elementRegistry'
 
 // ── Sub-handle parsing ────────────────────────────────────────────────
 
@@ -90,10 +90,9 @@ const INFRA_EDGE_DEFAULTS = {
   data: { protocol: '' } as EdgeData,
 }
 
-const UML_EDGE_DEFAULTS = {
+const UML_EDGE_BASE = {
   type: UML_EDGE_TYPE,
   style: { stroke: '#4a4f6a', strokeWidth: 1.5 },
-  data: { edgeKind: 'association' } as EdgeData,
 }
 
 export const useDiagramStore = create<DiagramStore>((set) => ({
@@ -119,9 +118,12 @@ export const useDiagramStore = create<DiagramStore>((set) => ({
   onConnect: (connection) =>
     set((s) => {
       if (!isInfraDiagramType(s.diagramType)) {
-        // UML diagrams: simple edge with association default
+        // UML / Sequence: use per-diagram default edge kind
+        const edgeData: EdgeData = s.diagramType === 'sequence'
+          ? { messageType: 'sync' }
+          : { edgeKind: getDefaultEdgeKind(s.diagramType) }
         return {
-          edges: addEdge({ ...UML_EDGE_DEFAULTS, ...connection }, s.edges),
+          edges: addEdge({ ...UML_EDGE_BASE, ...connection, data: edgeData }, s.edges),
           isDirty: true,
         }
       }

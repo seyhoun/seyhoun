@@ -18,6 +18,9 @@ import (
 	"seyhoun/internal/server"
 )
 
+// version is set at build time via -ldflags "-X main.version=x.y.z".
+var version = "0.0.1"
+
 func main() {
 	// Load .env file if present — sets env vars before Viper reads them.
 	// Existing OS env vars are not overwritten (godotenv.Load is a no-op for already-set vars).
@@ -34,7 +37,7 @@ func main() {
 	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level})
 	slog.SetDefault(slog.New(handler))
 
-	slog.Info("config loaded", "log_level", cfg.Log.Level)
+	slog.Info("starting seyhoun", "version", version, "log_level", cfg.Log.Level)
 
 	if cfg.Auth.JWTSecret == "" || cfg.Auth.JWTSecret == "change-me-in-production" {
 		log.Fatal("AUTH_JWT_SECRET must be set to a secure random value before starting the server. " +

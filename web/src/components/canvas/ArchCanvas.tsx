@@ -18,7 +18,7 @@ import '@xyflow/react/dist/style.css'
 import { useDiagramStore } from '../../stores/diagram'
 import { useUIStore } from '../../stores/ui'
 import { getTech } from '../../lib/techRegistry'
-import { isInfraDiagramType, getElement } from '../../lib/elementRegistry'
+import { isInfraDiagramType, getElementForDiagram } from '../../lib/elementRegistry'
 import type { ArchNode, ArchEdge, NodeTechnology, ElementKind } from '../../types/diagram'
 import { UmlMarkerDefs } from '../edges/UmlEdge'
 import {
@@ -103,7 +103,7 @@ export function ArchCanvas() {
         // UML drag-drop
         const elementKind = e.dataTransfer.getData('application/reactflow/element') as ElementKind
         if (!elementKind) return
-        const def = getElement(elementKind)
+        const def = getElementForDiagram(elementKind, diagramType)
         const node: ArchNode = {
           id:       crypto.randomUUID(),
           type:     elementKind,
@@ -114,7 +114,7 @@ export function ArchCanvas() {
         selectNode(node.id)
       }
     },
-    [screenToFlowPosition, addNode, selectNode, isInfra]
+    [screenToFlowPosition, addNode, selectNode, isInfra, diagramType]
   )
 
   const onNodeClick = useCallback(

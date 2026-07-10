@@ -11,6 +11,31 @@ export function EntityNode({ data, selected, id }: NodeProps<ArchNode>) {
 
   const attrs = d.attributes ?? []
 
+  // ── Relationship diamond ──────────────────────────────────────────────
+  if (d.elementKind === 'relationship') {
+    const size = 100
+    const half = size / 2
+    return (
+      <div className="relative" style={{ width: size, height: size }}>
+        <NodeHandles />
+        {isDesign && selected && <NodeDeleteButton nodeId={id} />}
+        <svg width={size} height={size} className="overflow-visible">
+          <polygon
+            points={`${half},2 ${size - 2},${half} ${half},${size - 2} 2,${half}`}
+            fill="#1a1c2e"
+            stroke={selected ? '#2dd4bf' : '#14b8a688'}
+            strokeWidth="1.5"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-[10px] font-semibold text-text-primary text-center italic px-2 leading-tight">
+            {d.label}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="relative">
       <NodeHandles />

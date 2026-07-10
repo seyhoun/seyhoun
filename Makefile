@@ -11,10 +11,12 @@ dev-api:
 dev-web:
 	cd web && npm run dev
 
+VERSION ?= 0.0.1
+
 ## Full production build: frontend → web/dist, then Go binary.
 build:
 	cd web && npm run build
-	go build -o seyhoun ./cmd
+	go build -ldflags "-X main.version=$(VERSION)" -o seyhoun ./cmd
 
 ## Run the production binary (serves everything on :1374).
 run: build

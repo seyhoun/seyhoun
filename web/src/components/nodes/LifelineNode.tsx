@@ -50,8 +50,13 @@ export function LifelineNode({ data, selected, id }: NodeProps<ArchNode>) {
           ${selected ? 'ring-1 ring-rose-500/50 shadow-lg shadow-black/40' : ''}
         `}
       >
+        {/* Show stereotype for non-object participants */}
         {d.participantType && d.participantType !== 'object' && (
           <p className="text-[9px] text-rose-400 mb-0.5">«{d.participantType}»</p>
+        )}
+        {/* Custom stereotype override */}
+        {d.stereotype && !d.participantType && (
+          <p className="text-[9px] text-rose-400 mb-0.5">«{d.stereotype}»</p>
         )}
         <p className="text-xs font-semibold text-text-primary">{d.label}</p>
       </div>

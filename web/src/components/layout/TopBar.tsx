@@ -6,6 +6,7 @@ import { useDiagramStore } from '../../stores/diagram'
 import { useAuthStore } from '../../stores/auth'
 import { api } from '../../lib/api'
 import { ExportMenu } from '../panels/ExportMenu'
+import { DIAGRAM_TYPE_MAP } from '../../lib/techRegistry'
 
 const MODES: { key: AppMode; label: string; Icon: typeof Layout }[] = [
   { key: 'design',  label: 'Design',  Icon: Layout },
@@ -19,7 +20,7 @@ export function TopBar() {
   const navigate = useNavigate()
   const { mode, setMode, toggleSidebar, historyPanelOpen, setHistoryPanelOpen } = useUIStore()
   const { user, logout } = useAuthStore()
-  const { diagramId, defaultBranchId, diagramName, nodes, edges, isDirty, markSaved, breadcrumb, popToIndex, loadDiagram } = useDiagramStore()
+  const { diagramId, defaultBranchId, diagramName, diagramType, nodes, edges, isDirty, markSaved, breadcrumb, popToIndex, loadDiagram } = useDiagramStore()
   const [saveState, setSaveState] = useState<SaveState>('idle')
 
   async function save() {
@@ -60,6 +61,7 @@ export function TopBar() {
         projectId: d.projectId,
         defaultBranchId: d.defaultBranchId,
         name: target.diagramName,
+        diagramType: d.diagramType,
         nodes: JSON.parse(d.nodesJson || '[]'),
         edges: JSON.parse(d.edgesJson || '[]'),
       })
@@ -118,6 +120,11 @@ export function TopBar() {
         ) : (
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-sm text-text-secondary truncate max-w-[240px]">{diagramName}</span>
+            {diagramType && DIAGRAM_TYPE_MAP.get(diagramType) && (
+              <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                {DIAGRAM_TYPE_MAP.get(diagramType)!.label}
+              </span>
+            )}
             {isDirty && (
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" title="Unsaved changes" />
             )}
