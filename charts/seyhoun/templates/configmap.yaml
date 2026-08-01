@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "seyhoun.fullname" . }}
+  labels:
+    {{- include "seyhoun.labels" . | nindent 4 }}
+data:
+  SERVER_PORT: {{ .Values.server.port | quote }}
+  LOG_LEVEL: {{ .Values.log.level | quote }}
+  DATABASE_HOST: {{ include "seyhoun.databaseHost" . | quote }}
+  DATABASE_PORT: {{ include "seyhoun.databasePort" . | quote }}
+  DATABASE_USER: {{ .Values.database.user | quote }}
+  DATABASE_NAME: {{ .Values.database.name | quote }}
+  DATABASE_SSLMODE: {{ .Values.database.sslmode | quote }}
+  DATABASE_TIMEZONE: {{ .Values.database.timezone | quote }}

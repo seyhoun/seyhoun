@@ -1,0 +1,161 @@
+# Default values for the seyhoun chart.
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  # Set to your registry, e.g. ghcr.io/<org>/seyhoun
+  repository: seyhoun
+  pullPolicy: IfNotPresent
+  # Defaults to .Chart.AppVersion when empty.
+  tag: ""
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+  # Container port the app listens on (must match server.port below).
+  targetPort: 1374
+
+resources: {}
+# resources:
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
+#   limits:
+#     memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ── Ingress ──────────────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: seyhoun.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # tls:
+  #   - secretName: seyhoun-tls
+  #     hosts:
+  #       - seyhoun.example.com
+
+# ── Gateway API (HTTPRoute) ─────────────────────────────────────────
+# Attaches to an existing Gateway managed outside this chart.
+gatewayApi:
+  enabled: false
+  parentRefs:
+    - name: ""
+      # namespace: gateway-system
+      # sectionName: https
+  hostnames: []
+  # hostnames:
+  #   - seyhoun.example.com
+  annotations: {}
+
+# ── App config (non-secret) ─────────────────────────────────────────
+# Mirrors config.yml / .env.example — see CLAUDE.md.
+server:
+  port: 1374
+  corsOrigins:
+    - "*"
+
+log:
+  level: info
+
+# ── Auth ─────────────────────────────────────────────────────────────
+auth:
+  # Secret must contain the JWT signing key under jwtSecretKey.
+  # Generate one with: openssl rand -hex 32
+  existingSecret: ""
+  jwtSecretKey: jwt-secret
+
+# ── Database ─────────────────────────────────────────────────────────
+database:
+  # Left empty and auto-derived from the bundled postgresql subchart
+  # when postgresql.enabled is true. Required otherwise.
+  host: ""
+  port: 5432
+  user: seyhoun
+  name: seyhoun
+  sslmode: disable
+  timezone: UTC
+  # Secret containing the DB password. When postgresql.enabled is true and
+  # this is left empty, falls back to postgresql.auth.existingSecret (or the
+  # subchart's own generated secret) — set postgresql.auth.existingSecret
+  # instead in that case so both sides read the same secret.
+  existingSecret: ""
+  existingSecretPasswordKey: password
+
+# ── Bundled Postgres (bitnami/postgresql subchart) ──────────────────
+postgresql:
+  enabled: false
+  auth:
+    username: seyhoun
+    database: seyhoun
+    # Point at your own pre-created secret (recommended) — this chart never
+    # generates or stores DB credentials itself. Must contain the key named
+    # in secretKeys.userPasswordKey below.
+    existingSecret: ""
+    secretKeys:
+      userPasswordKey: password
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# ── DB migrations (pre-upgrade/pre-install Helm hook Job) ───────────
+migrations:
+  enabled: true
+  backoffLimit: 2
+  resources: {}
+
+extraEnv: []
+extraEnvFrom: []
+extraVolumes: []
+extraVolumeMounts: []
+
+livenessProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
