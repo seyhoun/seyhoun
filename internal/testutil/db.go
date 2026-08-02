@@ -33,22 +33,35 @@ func TestDB(t *testing.T) *gorm.DB {
 	}
 
 	// Ensure schema is up-to-date (idempotent).
-	if err := db.AutoMigrate(
-		&models.User{},
-		&models.Workspace{},
-		&models.WorkspaceMember{},
-		&models.Project{},
-		&models.ProjectMember{},
-		&models.Diagram{},
-		&models.Branch{},
-		&models.Commit{},
-		&models.PullRequest{},
-		&models.PRComment{},
-		&models.PluginConfig{},
-		&models.MetricSnapshot{},
-		&models.DiagramVersion{},
-	); err != nil {
-		t.Fatalf("testutil: auto-migrate: %v", err)
+	//
+	// Branch and Commit reference each other (Branch.HeadCommit <-> Commit.Branch),
+	// so GORM's association traversal tries to create whichever table it reaches
+	// second with a FK to a table that doesn't exist yet, regardless of the order
+	// passed below. Migrate once with FK constraints off to create bare tables,
+	// then again with them on to add the constraints now both tables exist.
+	migrate := func(disableFK bool) error {
+		db.Config.DisableForeignKeyConstraintWhenMigrating = disableFK
+		return db.AutoMigrate(
+			&models.User{},
+			&models.Workspace{},
+			&models.WorkspaceMember{},
+			&models.Project{},
+			&models.ProjectMember{},
+			&models.Branch{},
+			&models.Diagram{},
+			&models.Commit{},
+			&models.PullRequest{},
+			&models.PRComment{},
+			&models.PluginConfig{},
+			&models.MetricSnapshot{},
+			&models.DiagramVersion{},
+		)
+	}
+	if err := migrate(true); err != nil {
+		t.Fatalf("testutil: auto-migrate (tables): %v", err)
+	}
+	if err := migrate(false); err != nil {
+		t.Fatalf("testutil: auto-migrate (constraints): %v", err)
 	}
 
 	tx := db.Begin()
