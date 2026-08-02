@@ -93,3 +93,6 @@ jobs:
 
       - name: Build image
         run: docker compose build
+        env:
+          DATABASE_PASSWORD: ci-build-placeholder
+          AUTH_JWT_SECRET: ci-build-placeholder

@@ -97,7 +97,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return tx.Create(&wsMember).Error
 	}); err != nil {
 		// Email is the only unique constraint on users; anything else is a server error.
-		if strings.Contains(err.Error(), "users_email_key") || strings.Contains(err.Error(), "uni_users_email") {
+		if strings.Contains(err.Error(), "idx_users_email") {
 			writeError(w, 409, "email already in use")
 			return
 		}
@@ -184,7 +184,7 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	if err := h.db.Model(&models.User{}).Where("id = ?", userID).
 		Select("Name", "Email").
 		Updates(map[string]any{"name": req.Name, "email": req.Email}).Error; err != nil {
-		if strings.Contains(err.Error(), "users_email_key") || strings.Contains(err.Error(), "uni_users_email") {
+		if strings.Contains(err.Error(), "idx_users_email") {
 			writeError(w, 409, "email already in use")
 			return
 		}

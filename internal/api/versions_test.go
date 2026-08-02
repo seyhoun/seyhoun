@@ -16,8 +16,15 @@ import (
 	"seyhoun/internal/testutil"
 )
 
-func versionedRouter(db *gorm.DB) http.Handler {
+func versionedRouter(db *gorm.DB, userID string) http.Handler {
 	r := chi.NewRouter()
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r.WithContext(
+				api.ContextWithUserID(r.Context(), userID),
+			))
+		})
+	})
 	vh := api.NewVersionHandler(db)
 	r.Get("/diagrams/{id}/versions", vh.List)
 	r.Post("/diagrams/{id}/restore/{versionId}", vh.Restore)
@@ -34,7 +41,7 @@ func TestVersions_List_Empty(t *testing.T) {
 	d := models.Diagram{ID: diagramID, ProjectID: projID, Name: "D"}
 	require.NoError(t, db.Create(&d).Error)
 
-	srv := versionedRouter(db)
+	srv := versionedRouter(db, uid)
 
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/diagrams/"+diagramID+"/versions", nil)
@@ -74,7 +81,7 @@ func TestVersions_ListAndGet(t *testing.T) {
 	require.NoError(t, db.Create(&v1).Error)
 	require.NoError(t, db.Create(&v2).Error)
 
-	srv := versionedRouter(db)
+	srv := versionedRouter(db, uid)
 
 	// List — should return both, newest first.
 	rec := httptest.NewRecorder()
@@ -121,7 +128,7 @@ func TestVersions_Restore(t *testing.T) {
 	}
 	require.NoError(t, db.Create(&v1).Error)
 
-	srv := versionedRouter(db)
+	srv := versionedRouter(db, uid)
 
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "/diagrams/"+diagramID+"/restore/"+v1.ID, nil)
@@ -141,7 +148,7 @@ func TestVersions_Restore(t *testing.T) {
 
 func TestVersions_Get_NotFound(t *testing.T) {
 	db := testutil.TestDB(t)
-	srv := versionedRouter(db)
+	srv := versionedRouter(db, "")
 
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/versions/does-not-exist", nil)

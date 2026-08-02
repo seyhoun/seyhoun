@@ -86,7 +86,7 @@ type Workspace struct {
 	CreatedAt  time.Time `gorm:"autoCreateTime"                    json:"createdAt"`
 	UpdatedAt  time.Time `gorm:"autoUpdateTime"                    json:"updatedAt"`
 
-	Owner    *User             `gorm:"foreignKey:OwnerID"                                    json:"-"`
+	Owner    *User             `gorm:"foreignKey:OwnerID;constraint:-"                       json:"-"`
 	Members  []WorkspaceMember `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"    json:"members,omitempty"`
 	Projects []Project         `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE"    json:"projects,omitempty"`
 }
@@ -181,8 +181,8 @@ type Branch struct {
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"                                                      json:"updatedAt"`
 
 	Diagram    *Diagram `gorm:"foreignKey:DiagramID;constraint:OnDelete:CASCADE" json:"-"`
-	HeadCommit *Commit  `gorm:"foreignKey:HeadCommitID;constraint:false"          json:"headCommit,omitempty"`
-	CreatedBy  *User    `gorm:"foreignKey:CreatedByID"                           json:"-"`
+	HeadCommit *Commit  `gorm:"foreignKey:HeadCommitID;constraint:-"             json:"headCommit,omitempty"`
+	CreatedBy  *User    `gorm:"foreignKey:CreatedByID;constraint:-"              json:"-"`
 }
 
 func (Branch) TableName() string { return "branches" }
@@ -205,8 +205,8 @@ type Commit struct {
 
 	Diagram *Diagram `gorm:"foreignKey:DiagramID;constraint:OnDelete:CASCADE" json:"-"`
 	Branch  *Branch  `gorm:"foreignKey:BranchID;constraint:OnDelete:CASCADE"  json:"-"`
-	Parent  *Commit  `gorm:"foreignKey:ParentID"                              json:"-"`
-	Author  *User    `gorm:"foreignKey:AuthorID"                              json:"-"`
+	Parent  *Commit  `gorm:"foreignKey:ParentID;constraint:-"                 json:"-"`
+	Author  *User    `gorm:"foreignKey:AuthorID;constraint:-"                 json:"-"`
 }
 
 func (Commit) TableName() string { return "commits" }
@@ -229,10 +229,10 @@ type PullRequest struct {
 	UpdatedAt      time.Time  `gorm:"autoUpdateTime"                                                 json:"updatedAt"`
 
 	Diagram      *Diagram     `gorm:"foreignKey:DiagramID;constraint:OnDelete:CASCADE" json:"-"`
-	SourceBranch *Branch      `gorm:"foreignKey:SourceBranchID"                        json:"sourceBranch,omitempty"`
-	TargetBranch *Branch      `gorm:"foreignKey:TargetBranchID"                        json:"targetBranch,omitempty"`
-	Author       *User        `gorm:"foreignKey:AuthorID"                              json:"-"`
-	MergedBy     *User        `gorm:"foreignKey:MergedByID"                            json:"-"`
+	SourceBranch *Branch      `gorm:"foreignKey:SourceBranchID;constraint:-"           json:"sourceBranch,omitempty"`
+	TargetBranch *Branch      `gorm:"foreignKey:TargetBranchID;constraint:-"           json:"targetBranch,omitempty"`
+	Author       *User        `gorm:"foreignKey:AuthorID;constraint:-"                 json:"-"`
+	MergedBy     *User        `gorm:"foreignKey:MergedByID;constraint:-"               json:"-"`
 	Comments     []PRComment  `gorm:"foreignKey:PullRequestID;constraint:OnDelete:CASCADE" json:"comments,omitempty"`
 }
 
@@ -250,7 +250,7 @@ type PRComment struct {
 	UpdatedAt     time.Time `gorm:"autoUpdateTime"              json:"updatedAt"`
 
 	PullRequest *PullRequest `gorm:"foreignKey:PullRequestID;constraint:OnDelete:CASCADE" json:"-"`
-	Author      *User        `gorm:"foreignKey:AuthorID"                                   json:"-"`
+	Author      *User        `gorm:"foreignKey:AuthorID;constraint:-"                      json:"-"`
 }
 
 func (PRComment) TableName() string { return "pr_comments" }
