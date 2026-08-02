@@ -46,6 +46,8 @@ web/src/
                           type guards (isClassNodeData, isSequenceNodeData, …)
 config.yml                Default config (API port 1375, postgres localhost)
 .env.example              Documents secret env var overrides
+charts/seyhoun/            Helm chart — Ingress, Gateway API, optional bundled Postgres,
+                          migration Job (see charts/seyhoun/README.md)
 ```
 
 ## Configuration

@@ -1,0 +1,36 @@
+Seyhoun has been deployed as {{ include "seyhoun.fullname" . }} in namespace {{ .Release.Namespace }}.
+
+Required secrets (this chart never creates or generates them):
+  - {{ .Values.auth.existingSecret | default "<auth.existingSecret>" }} — key {{ .Values.auth.jwtSecretKey }} (JWT signing key)
+{{- if .Values.postgresql.enabled }}
+  - {{ if .Values.database.existingSecret }}{{ .Values.database.existingSecret }}{{ else }}{{ .Values.postgresql.auth.existingSecret | default "<postgresql.auth.existingSecret>" }}{{ end }} — key {{ include "seyhoun.databasePasswordSecretKey" . }} (Postgres password, shared with the bundled postgresql subchart)
+{{- else }}
+  - {{ .Values.database.existingSecret | default "<database.existingSecret>" }} — key {{ .Values.database.existingSecretPasswordKey }} (Postgres password)
+{{- end }}
+
+{{- if not .Values.auth.existingSecret }}
+
+WARNING: auth.existingSecret is not set — the Deployment will fail to render/start.
+Create it first, e.g.:
+  kubectl create secret generic seyhoun-auth --from-literal=jwt-secret=$(openssl rand -hex 32)
+{{- end }}
+
+{{- if .Values.migrations.enabled }}
+
+Database migrations run automatically as a pre-install/pre-upgrade Helm hook Job
+({{ include "seyhoun.fullname" . }}-migrate).
+{{- end }}
+
+Access the app:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  http://{{ .host }}
+{{- end }}
+{{- else if .Values.gatewayApi.enabled }}
+{{- range .Values.gatewayApi.hostnames }}
+  http://{{ . }}
+{{- end }}
+{{- else }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "seyhoun.fullname" . }} 8080:{{ .Values.service.port }}
+  Then open http://localhost:8080
+{{- end }}

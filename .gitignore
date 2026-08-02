@@ -1,7 +1,7 @@
 # Binaries
-seyhoun
-seyhoun-cli
-migrate
+/seyhoun
+/seyhoun-cli
+/migrate
 
 # Dependencies
 web/node_modules/
@@ -34,3 +34,6 @@ seyhoun.db*
 # Temp / logs
 tmp/
 *.log
+
+# Helm — vendored subchart tarballs (regenerate via `helm dependency build`)
+charts/*/charts/*.tgz
