@@ -26,5 +26,6 @@ COPY --from=backend /seyhoun /usr/local/bin/seyhoun
 COPY --from=backend /seyhoun-migrate /usr/local/bin/seyhoun-migrate
 COPY --from=backend /app/migrations ./migrations
 COPY --from=backend /app/config.example.yml ./config.example.yml
+COPY --from=backend /app/web/dist ./web/dist
 EXPOSE 1374
 ENTRYPOINT ["seyhoun"]
