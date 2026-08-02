@@ -7,7 +7,7 @@ replicaCount: 1
 
 image:
   # Set to your registry, e.g. ghcr.io/<org>/seyhoun
-  repository: seyhoun
+  repository: ghcr.io/seyhoun/seyhoun
   pullPolicy: IfNotPresent
   # Defaults to .Chart.AppVersion when empty.
   tag: ""
